@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Fire Chat</string>
+    <string name="ok">Continue</string>
+    <string name="sign_in">Sign In</string>
 </resources>

@@ -2,9 +2,21 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/userListFragment">
+    app:startDestination="@id/signInFragment">
+
     <fragment
         android:id="@+id/userListFragment"
         android:name="com.arjun.firechat.UserListFragment"
         android:label="UserListFragment" />
+
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.arjun.firechat.SignInFragment"
+        android:label="SignInFragment">
+        <action
+            android:id="@+id/action_signInFragment_to_userListFragment"
+            app:destination="@id/userListFragment"
+            app:popUpTo="@id/signInFragment" />
+    </fragment>
+
 </navigation>

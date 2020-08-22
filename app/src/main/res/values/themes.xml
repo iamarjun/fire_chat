@@ -3,7 +3,7 @@
 
     <!--Material color attributes (light theme) -->
 
-    <style name="Base.Theme" parent="Theme.MaterialComponents.DayNight.DarkActionBar" />
+    <style name="Base.Theme" parent="Theme.MaterialComponents.Light.DarkActionBar" />
 
     <style name="Base.Theme.App" parent="Base.Theme">
         <item name="colorPrimary">@color/primaryColor</item> <!--toolbar color-->
