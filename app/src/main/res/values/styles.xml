@@ -1,10 +1,169 @@
-<resources>
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- TextInputLayout styles -->
+
+    <style name="App.Theme.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextColor">?colorSecondaryVariant</item>
+        <item name="boxStrokeColor">@color/material_text_input_border_states</item>
+        <item name="theme">@style/TextInputCursorColor</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeWidth">1dp</item>
+    </style>
+
+    <!-- Tab Layout styles -->
+
+    <style name="App.Theme.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabBackground">?colorPrimary</item>
+        <item name="tabIndicatorColor">?colorSecondaryVariant</item>
+        <item name="tabSelectedTextColor">?colorSecondary</item>
+        <item name="tabTextColor">?android:textColorPrimary</item>
+        <item name="tabMode">scrollable</item>
+    </style>
+
+    <style name="TextInputCursorColor" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="colorControlActivated">#7c808e</item>
+    </style>
+
+    <!-- Button styles -->
+
+    <style name="App.Theme.Button" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="backgroundTint">?colorSecondary</item>
+    </style>
+
+    <style name="App.Theme.Button.Pink" parent="App.Theme.Button">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Rounded.All.Light</item>
+        <item name="android:padding">12dp</item>
+        <item name="rippleColor">@color/secondaryLightColor</item>
+        <item name="backgroundTint">@drawable/material_button_pink_background</item>
+        <item name="android:textColor">@drawable/material_button_pink_text</item>
+    </style>
+
+    <!-- Bottom sheet styles -->
+
+    <style name="App.Theme.BottomSheet" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/MaterialBottomSheet.Sharp.Tops</item>
+        <item name="android:windowAnimationStyle">@style/Animation.AppTheme.BottomSheet.Modal</item>
+    </style>
+
+    <style name="App.Theme.BottomSheet.Rounded" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/MaterialBottomSheet.Rounded.Tops</item>
+        <item name="android:windowAnimationStyle">@style/Animation.AppTheme.BottomSheet.Modal</item>
+    </style>
+
+    <style name="MaterialBottomSheet.Sharp.Tops" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">?attr/shapeAppearanceLargeComponent</item>
+    </style>
+
+    <style name="MaterialBottomSheet.Rounded.Tops" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Rounded.Tops</item>
+    </style>
+
+    <!-- Material card view styles -->
+
+    <style name="App.Theme.MaterialCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardPreventCornerOverlap">false</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="MaterialCardView.Cut.Corner" parent="App.Theme.MaterialCardView">
+        <item name="shapeAppearance">@style/ShapeAppearance.Cut.Corners</item>
+    </style>
+
+    <style name="MaterialCardView.Partial.Cut.Corner" parent="App.Theme.MaterialCardView">
+        <item name="shapeAppearance">@style/ShapeAppearance.Partial.Cut.Corners</item>
+    </style>
+
+    <style name="MaterialCardView.Rounded" parent="App.Theme.MaterialCardView">
+        <item name="shapeAppearance">@style/ShapeAppearance.Rounded.Corners</item>
+    </style>
+
+    <style name="MaterialCardView.Partial.Rounded" parent="App.Theme.MaterialCardView">
+        <item name="shapeAppearance">@style/ShapeAppearance.Partial.Rounded.Corners</item>
+    </style>
+
+    <!-- Typography -->
+
+    <style name="App.Theme.Text.Title.SP" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize">34sp</item>
+    </style>
+
+    <style name="App.Theme.Text.Title.DP" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize" tools:ignore="SpUsage">34dp</item>
+    </style>
+
+    <style name="App.Theme.Text.Title.SSP" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize">34sp</item>
+    </style>
+
+    <style name="App.Theme.Text.Title.SDP" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize">34sp</item>
+    </style>
+
+    <!-- Shapes -->
+
+    <style name="ShapeAppearance.Cut.Corners" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">@dimen/hard_corner_cuts</item>
+    </style>
+
+    <style name="ShapeAppearance.Partial.Cut.Corners" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamilyTopLeft">cut</item>
+        <item name="cornerFamilyBottomRight">cut</item>
+        <item name="cornerSizeTopLeft">@dimen/hard_corner_cuts</item>
+        <item name="cornerSizeBottomRight">@dimen/hard_corner_cuts</item>
+    </style>
+
+    <style name="ShapeAppearance.Rounded.Corners" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/hard_corner_cuts</item>
+    </style>
+
+    <style name="ShapeAppearance.Partial.Rounded.Corners" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamilyTopLeft">rounded</item>
+        <item name="cornerFamilyBottomRight">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/hard_corner_cuts</item>
+        <item name="cornerSizeBottomRight">@dimen/hard_corner_cuts</item>
+    </style>
+
+    <style name="ShapeAppearance.Rounded.Tops" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamilyTopLeft">rounded</item>
+        <item name="cornerFamilyTopRight">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/hard_corner_cuts</item>
+        <item name="cornerSizeTopRight">@dimen/hard_corner_cuts</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Rounded.All.Light" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/light_corner_cuts</item>
+    </style>
+
+    <!-- Toolbar -->
+
+    <style name="ToolbarAppearance" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
+        <item name="popupTheme">@style/ToolbarAppearanceOverlay</item>
+        <item name="theme">@style/ToolbarAppearanceOverlay</item>
+    </style>
+
+    <!-- For widgets on Toolbar -->
+
+    <style name="ToolbarAppearanceOverlay">
+        <item name="android:textColorPrimary">?colorOnPrimary</item>
+        <item name="colorControlNormal">?colorOnPrimary</item>
+        <item name="colorControlHighlight">?colorOnPrimary</item>
+        <item name="android:textColorHint">?colorOnPrimary</item>
     </style>
 
 </resources>
