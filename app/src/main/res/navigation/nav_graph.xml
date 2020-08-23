@@ -7,16 +7,29 @@
     <fragment
         android:id="@+id/userListFragment"
         android:name="com.arjun.firechat.userList.UserListFragment"
-        android:label="UserListFragment" />
+        android:label="UserListFragment">
+        <action
+            android:id="@+id/action_userListFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/signInFragment"
-        android:name="com.arjun.firechat.SignInFragment"
+        android:name="com.arjun.firechat.signIn.SignInFragment"
         android:label="SignInFragment">
         <action
             android:id="@+id/action_signInFragment_to_userListFragment"
             app:destination="@id/userListFragment"
             app:popUpTo="@id/signInFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.arjun.firechat.chat.ChatFragment"
+        android:label="ChatFragment">
+        <argument
+            android:name="userId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

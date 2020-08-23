@@ -1,4 +1,4 @@
-package com.arjun.firechat
+package com.arjun.firechat.signIn
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -16,6 +16,9 @@ import com.afollestad.materialdialogs.ModalDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.lifecycle.lifecycleOwner
+import com.arjun.firechat.BaseFragment
+import com.arjun.firechat.MainViewModel
+import com.arjun.firechat.R
 import com.arjun.firechat.databinding.FragmentSignInBinding
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding

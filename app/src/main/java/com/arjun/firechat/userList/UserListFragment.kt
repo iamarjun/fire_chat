@@ -6,11 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
 import com.arjun.firechat.databinding.FragmentUserListBinding
+import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
@@ -20,7 +22,18 @@ import timber.log.Timber
 @AndroidEntryPoint
 class UserListFragment : BaseFragment() {
 
-    private val userAdapter: UsersListAdapter by lazy { UsersListAdapter() }
+    private val userAdapter: UsersListAdapter by lazy {
+        UsersListAdapter(object :
+            UsersListAdapter.Interaction {
+            override fun onItemSelected(position: Int, item: User) {
+                val action =
+                    UserListFragmentDirections.actionUserListFragmentToChatFragment(item.id)
+                requireView().findNavController().navigate(action)
+            }
+
+        })
+    }
+
     private val binding: FragmentUserListBinding by viewBinding(FragmentUserListBinding::bind)
     private val viewModel: MainViewModel by activityViewModels()
 
