@@ -10,6 +10,9 @@ import com.arjun.firechat.util.Resource
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import timber.log.Timber
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainViewModel @ViewModelInject constructor(
     private val mDatabase: FirebaseDatabase
@@ -163,7 +166,7 @@ class MainViewModel @ViewModelInject constructor(
 
         val messages = mutableListOf<Message>()
 
-        val query = messageRef.child(currentUserId).child(chatUserId).limitToLast(10)
+        val query = messageRef.child(currentUserId).child(chatUserId).limitToLast(100)
 
 
         query.addChildEventListener(object : ChildEventListener {
@@ -199,6 +202,4 @@ class MainViewModel @ViewModelInject constructor(
 
         })
     }
-
-
 }

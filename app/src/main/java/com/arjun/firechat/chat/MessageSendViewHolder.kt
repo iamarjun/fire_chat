@@ -11,9 +11,12 @@ constructor(
 ) : RecyclerView.ViewHolder(itemView) {
 
     private val message = itemView.message_sender
+    private val time = itemView.message_time
+
 
     fun bind(item: Message) {
 
         message.text = item.message
+        time.text = item.getTime()
     }
 }
