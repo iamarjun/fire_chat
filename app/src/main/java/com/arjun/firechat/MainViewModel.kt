@@ -7,11 +7,14 @@ import androidx.lifecycle.ViewModel
 import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import timber.log.Timber
 
 class MainViewModel @ViewModelInject constructor(
-    private val database: FirebaseDatabase
+    private val mDatabase: FirebaseDatabase
 ) : ViewModel() {
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
@@ -23,7 +26,11 @@ class MainViewModel @ViewModelInject constructor(
     val currentUser: LiveData<Resource<Unit>>
         get() = _currentUser
 
-    private var userDb: DatabaseReference = database.getReference("users")
+
+    private val rootRef = mDatabase.reference
+    private val userRef = mDatabase.getReference("users")
+    private val chatRef = mDatabase.getReference("chat")
+    private val messageRef = mDatabase.getReference("messages")
 
 
     fun addNewUser(name: String, user: FirebaseUser?) {
@@ -31,7 +38,7 @@ class MainViewModel @ViewModelInject constructor(
         _currentUser.value = Resource.Loading()
 
         user?.let {
-            val db = userDb.child(it.uid)
+            val db = userRef.child(it.uid)
 
             val userMap = hashMapOf("name" to name)
 
@@ -53,7 +60,7 @@ class MainViewModel @ViewModelInject constructor(
 
         _allUsers.value = Resource.Loading()
 
-        userDb.addListenerForSingleValueEvent(object : ValueEventListener {
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Timber.d("Get all users")
 
@@ -78,6 +85,72 @@ class MainViewModel @ViewModelInject constructor(
 
         })
 
+    }
+
+    fun chatInit(currentUserId: String, chatUserId: String) {
+        chatRef.child(currentUserId).addValueEventListener(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.hasChild(chatUserId)) {
+                    val chatMap = hashMapOf<String, Any>(
+                        "seen" to false,
+                        "timestamp" to System.currentTimeMillis()
+                    )
+
+                    val chatUserMap = hashMapOf<String, Any>(
+                        "chat/$currentUserId/$chatUserId" to chatMap,
+                        "chat/$chatUserId/$currentUserId" to chatMap,
+                    )
+
+
+                    rootRef.updateChildren(
+                        chatUserMap
+                    ) { error, ref ->
+
+                        error?.let {
+                            Timber.d("Chat Log: ${it.details}")
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Timber.d("Chat Log: ${error.details}")
+            }
+
+        })
+    }
+
+    fun sendMessage(currentUserId: String, chatUserId: String, message: String) {
+        val currentUserRef = "messages/$currentUserId/$chatUserId"
+        val chatUserRef = "messages/$chatUserId/$currentUserId"
+
+        val push = messageRef.child(currentUserId)
+            .child(chatUserId)
+            .push()
+
+        val pushKey = push.key
+
+        val messageMap = hashMapOf<String, Any>(
+            "message" to message,
+            "seen" to false,
+            "type" to "text",
+            "timestamp" to System.currentTimeMillis(),
+        )
+
+
+        val messageUserMap = hashMapOf<String, Any>(
+            "$currentUserRef/$pushKey" to messageMap,
+            "$chatUserRef/$pushKey" to messageMap
+        )
+
+        rootRef.updateChildren(
+            messageUserMap
+        ) { error, ref ->
+            error?.let {
+                Timber.d("Chat Log: ${it.details}")
+            }
+        }
     }
 
 
