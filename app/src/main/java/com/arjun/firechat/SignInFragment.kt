@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.afollestad.materialdialogs.DialogBehavior
 import com.afollestad.materialdialogs.LayoutMode
@@ -15,23 +17,36 @@ import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.lifecycle.lifecycleOwner
 import com.arjun.firechat.databinding.FragmentSignInBinding
+import com.arjun.firechat.util.Resource
+import com.arjun.firechat.util.viewBinding
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_sign_in_bottom_sheet.*
 import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SignInFragment : BaseFragment() {
+
+    private val binding: FragmentSignInBinding by viewBinding(FragmentSignInBinding::bind)
+    private val viewModel: MainViewModel by activityViewModels()
+
+    @Inject
+    internal lateinit var mAuth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return FragmentSignInBinding.inflate(layoutInflater, container, false).root
+        return layoutInflater.inflate(R.layout.fragment_sign_in, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        val currentUser = mAuth?.currentUser
+        val currentUser = mAuth.currentUser
 
         currentUser?.let {
 
@@ -44,25 +59,38 @@ class SignInFragment : BaseFragment() {
 
         }
 
+
+        viewModel.currentUser.observe(viewLifecycleOwner) {
+
+            binding.loader.isVisible = it is Resource.Loading
+
+            when (it) {
+
+                is Resource.Success -> {
+                    navigateToUserListFragment()
+                }
+
+                is Resource.Error -> {
+                    it.message?.let { errorMessage ->
+                        Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_SHORT).show()
+                    }
+
+                    showSignInDialog(BottomSheet(LayoutMode.WRAP_CONTENT))
+                }
+            }
+        }
+
     }
 
     private fun anonymousSignIn(name: String) {
-        mAuth?.signInAnonymously()
-            ?.addOnCompleteListener(requireActivity()) { task ->
+        mAuth.signInAnonymously()
+            .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Timber.d("signInAnonymously:success")
-                    val user = mAuth?.currentUser
+                    val user = mAuth.currentUser
 
-                    user?.let {
-                        val db = getUser(it.uid)
-
-                        val userMap = hashMapOf("name" to name)
-
-                        db?.setValue(userMap)
-
-                        navigateToUserListFragment()
-                    }
+                    viewModel.addNewUser(name, user)
 
                     Toast.makeText(
                         requireContext(), "Authentication Success.",
@@ -103,6 +131,9 @@ class SignInFragment : BaseFragment() {
         val submit = dialog.btn_submit
 
         submit.setOnClickListener {
+
+            dialog.dismiss()
+
             if (!TextUtils.isEmpty(name.text))
                 anonymousSignIn(name = name.text.toString())
             else

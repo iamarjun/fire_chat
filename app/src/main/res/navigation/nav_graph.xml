@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/userListFragment"
-        android:name="com.arjun.firechat.UserListFragment"
+        android:name="com.arjun.firechat.userList.UserListFragment"
         android:label="UserListFragment" />
 
     <fragment

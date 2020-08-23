@@ -9,18 +9,18 @@ import com.google.firebase.database.FirebaseDatabase
 
 abstract class BaseFragment : Fragment() {
 
-    var mAuth: FirebaseAuth? = null
-    private var mDatabase: FirebaseDatabase? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mAuth = FirebaseAuth.getInstance()
-        mDatabase = FirebaseDatabase.getInstance()
     }
 
-    fun getUser(uId: String): DatabaseReference? {
-        return mDatabase?.reference?.child("Users")?.child(uId)
-    }
+//    fun getAllUsers(): DatabaseReference {
+////        return mDatabase.getReference("users")
+//    }
+//
+//    fun getUser(uId: String): DatabaseReference {
+//        return getAllUsers().child(uId)
+//    }
 
 }
