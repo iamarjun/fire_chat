@@ -16,11 +16,16 @@ import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment() {
+
+    @Inject
+    internal lateinit var mAuth: FirebaseAuth
 
     private val userAdapter: UsersListAdapter by lazy {
         UsersListAdapter(object :
@@ -54,7 +59,9 @@ class UserListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.fetchAllUsers()
+        val currentUserId = mAuth.currentUser?.uid!!
+
+        viewModel.fetchAllUsers(currentUserId)
 
         viewModel.allUser.observe(viewLifecycleOwner) {
 

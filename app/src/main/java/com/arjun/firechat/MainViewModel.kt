@@ -4,13 +4,11 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.arjun.firechat.model.Message
 import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import timber.log.Timber
 
 class MainViewModel @ViewModelInject constructor(
@@ -20,12 +18,17 @@ class MainViewModel @ViewModelInject constructor(
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<Unit>>() }
 
+    private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
+
+
     val allUser: LiveData<Resource<List<User>>>
         get() = _allUsers
 
     val currentUser: LiveData<Resource<Unit>>
         get() = _currentUser
 
+    val allMessage: LiveData<Resource<List<Message>>>
+        get() = _allMessages
 
     private val rootRef = mDatabase.reference
     private val userRef = mDatabase.getReference("users")
@@ -56,7 +59,7 @@ class MainViewModel @ViewModelInject constructor(
         }
     }
 
-    fun fetchAllUsers() {
+    fun fetchAllUsers(currentUserId: String) {
 
         _allUsers.value = Resource.Loading()
 
@@ -73,7 +76,7 @@ class MainViewModel @ViewModelInject constructor(
                         user?.let { users.add(it) }
                     }
 
-                _allUsers.value = Resource.Success(users)
+                _allUsers.value = Resource.Success(users.filter { it.id != currentUserId })
 
             }
 
@@ -135,6 +138,7 @@ class MainViewModel @ViewModelInject constructor(
             "message" to message,
             "seen" to false,
             "type" to "text",
+            "from" to currentUserId,
             "timestamp" to System.currentTimeMillis(),
         )
 
@@ -151,6 +155,49 @@ class MainViewModel @ViewModelInject constructor(
                 Timber.d("Chat Log: ${it.details}")
             }
         }
+    }
+
+    fun loadMessages(currentUserId: String, chatUserId: String) {
+
+        _allMessages.value = Resource.Loading()
+
+        val messages = mutableListOf<Message>()
+
+        val query = messageRef.child(currentUserId).child(chatUserId).limitToLast(10)
+
+
+        query.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+
+                val message = snapshot.getValue(Message::class.java)
+
+                message?.id = snapshot.key!!
+
+                message?.let { messages.add(it) }
+
+                _allMessages.value = Resource.Success(messages)
+
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+                _allMessages.value = Resource.Error(error.details)
+
+            }
+
+        })
     }
 
 
