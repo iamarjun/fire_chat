@@ -54,8 +54,6 @@ class UserListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setActionBarTitle()
-
         currentUserId?.let {
             viewModel.setUserPresence(it)
             viewModel.fetchAllUsers(it)
