@@ -34,7 +34,6 @@ class MainViewModel @ViewModelInject constructor(
     private val chatRef = mDatabase.getReference("chat")
     private val messageRef = mDatabase.getReference("messages")
 
-
     fun addNewUser(name: String, user: FirebaseUser?) {
 
         _currentUser.value = Resource.Loading()

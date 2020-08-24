@@ -3,40 +3,34 @@ package com.arjun.firechat.chat
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
 import com.arjun.firechat.databinding.FragmentChatBinding
+import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
-import java.time.Instant
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class ChatFragment : BaseFragment() {
 
-    @Inject
-    internal lateinit var mAuth: FirebaseAuth
-
-    @Inject
-    internal lateinit var mDatabase: FirebaseDatabase
-
     private val binding: FragmentChatBinding by viewBinding(FragmentChatBinding::bind)
     private val viewModel: MainViewModel by activityViewModels()
     private val args: ChatFragmentArgs by navArgs()
+
+    private val chatUser: User by lazy { args.chatUser }
 
     private lateinit var chatAdapter: ChatAdapter
 
@@ -50,10 +44,12 @@ class ChatFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.d(args.userId)
+        Timber.d(chatUser.id)
+
+        setActionBarTitle(chatUser.name)
 
         val currentUserId = mAuth.currentUser?.uid!!
-        val chatUserId = args.userId
+        val chatUserId = chatUser.id
 
         chatAdapter = ChatAdapter(currentUserId)
 
@@ -101,6 +97,5 @@ class ChatFragment : BaseFragment() {
         }
 
     }
-
 
 }

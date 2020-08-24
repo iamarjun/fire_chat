@@ -16,25 +16,18 @@ import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment() {
-
-    @Inject
-    internal lateinit var mAuth: FirebaseAuth
-
-    private val currentUserId by lazy { mAuth.currentUser?.uid!! }
 
     private val userAdapter: UsersListAdapter by lazy {
         UsersListAdapter(object :
             UsersListAdapter.Interaction {
             override fun onItemSelected(position: Int, item: User) {
                 val action =
-                    UserListFragmentDirections.actionUserListFragmentToChatFragment(item.id)
+                    UserListFragmentDirections.actionUserListFragmentToChatFragment(item)
                 requireView().findNavController().navigate(action)
             }
 
@@ -61,9 +54,13 @@ class UserListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.setUserPresence(currentUserId)
+        setActionBarTitle()
 
-        viewModel.fetchAllUsers(currentUserId)
+        currentUserId?.let {
+            viewModel.setUserPresence(it)
+            viewModel.fetchAllUsers(it)
+        }
+
 
         viewModel.allUser.observe(viewLifecycleOwner) {
 

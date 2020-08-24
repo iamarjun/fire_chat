@@ -28,8 +28,8 @@
         android:name="com.arjun.firechat.chat.ChatFragment"
         android:label="ChatFragment">
         <argument
-            android:name="userId"
-            app:argType="string" />
+            android:name="chatUser"
+            app:argType="com.arjun.firechat.model.User" />
     </fragment>
 
 </navigation>
