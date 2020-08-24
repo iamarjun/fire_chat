@@ -1,9 +1,7 @@
 package com.arjun.firechat.userList
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -39,8 +37,8 @@ class UserListFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         Timber.d("UserListFragment")
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -82,6 +80,21 @@ class UserListFragment : BaseFragment() {
             adapter = userAdapter
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.settings, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if (item.itemId == R.id.settings) {
+            val action = UserListFragmentDirections.actionUserListFragmentToSettingsFragment()
+            requireView().findNavController().navigate(action)
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
 

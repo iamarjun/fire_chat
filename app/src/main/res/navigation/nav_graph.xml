@@ -11,6 +11,9 @@
         <action
             android:id="@+id/action_userListFragment_to_chatFragment"
             app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_userListFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -31,5 +34,9 @@
             android:name="chatUser"
             app:argType="com.arjun.firechat.model.User" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.arjun.firechat.settings.SettingsFragment"
+        android:label="SettingsFragment" />
 
 </navigation>

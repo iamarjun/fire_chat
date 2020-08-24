@@ -59,7 +59,7 @@ class SignInFragment : BaseFragment() {
         }
 
 
-        viewModel.currentUser.observe(viewLifecycleOwner) {
+        viewModel.addNewUser.observe(viewLifecycleOwner) {
 
             binding.loader.isVisible = it is Resource.Loading
 

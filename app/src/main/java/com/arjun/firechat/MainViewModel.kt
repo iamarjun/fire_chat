@@ -1,34 +1,52 @@
 package com.arjun.firechat
 
+import android.net.Uri
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arjun.firechat.model.Message
 import com.arjun.firechat.model.User
+import com.arjun.firechat.util.FileUtils
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.TimeSince
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class MainViewModel @ViewModelInject constructor(
-    mDatabase: FirebaseDatabase
+    mDatabase: FirebaseDatabase,
+    mStorage: FirebaseStorage,
+    private val fileUtils: FileUtils
 ) : ViewModel() {
 
+    private val rootRef = mDatabase.reference
+    private val userRef = mDatabase.getReference("users")
+    private val chatRef = mDatabase.getReference("chat")
+    private val messageRef = mDatabase.getReference("messages")
+
+    private val rootStorageRef = mStorage.reference
+    private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
+
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
-    private val _currentUser by lazy { MutableLiveData<Resource<Unit>>() }
+    private val _currentUser by lazy { MutableLiveData<Resource<User>>() }
+    private val _addNewUser by lazy { MutableLiveData<Resource<Unit>>() }
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
+    private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
 
     val allUser: LiveData<Resource<List<User>>>
         get() = _allUsers
 
-    val currentUser: LiveData<Resource<Unit>>
+    val currentUser: LiveData<Resource<User>>
         get() = _currentUser
+
+    val addNewUser: LiveData<Resource<Unit>>
+        get() = _addNewUser
 
     val allMessage: LiveData<Resource<List<Message>>>
         get() = _allMessages
@@ -36,14 +54,12 @@ class MainViewModel @ViewModelInject constructor(
     val chatUserStatus: LiveData<Resource<String>>
         get() = _chatUserStatus
 
-    private val rootRef = mDatabase.reference
-    private val userRef = mDatabase.getReference("users")
-    private val chatRef = mDatabase.getReference("chat")
-    private val messageRef = mDatabase.getReference("messages")
+    val pictureUploadStatus: LiveData<Resource<Unit>>
+        get() = _pictureUploadStatus
 
     fun addNewUser(name: String, user: FirebaseUser?) {
 
-        _currentUser.value = Resource.Loading()
+        _addNewUser.value = Resource.Loading()
 
         user?.let {
             val db = userRef.child(it.uid)
@@ -51,12 +67,12 @@ class MainViewModel @ViewModelInject constructor(
             val userMap = hashMapOf("name" to name)
 
             db.setValue(userMap).addOnCompleteListener {
-                _currentUser.value = Resource.Success(Unit)
+                _addNewUser.value = Resource.Success(Unit)
 
             }.addOnFailureListener { e ->
 
                 e.message?.let { message ->
-                    _currentUser.value = Resource.Error(message)
+                    _addNewUser.value = Resource.Error(message)
                 }
 
             }
@@ -67,6 +83,7 @@ class MainViewModel @ViewModelInject constructor(
     fun fetchAllUsers(currentUserId: String) {
 
         _allUsers.value = Resource.Loading()
+        _currentUser.value = Resource.Loading()
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -81,6 +98,7 @@ class MainViewModel @ViewModelInject constructor(
                         user?.let { users.add(it) }
                     }
 
+                _currentUser.value = Resource.Success(users.first { it.id == currentUserId })
                 _allUsers.value = Resource.Success(users.filter { it.id != currentUserId })
 
             }
@@ -89,6 +107,7 @@ class MainViewModel @ViewModelInject constructor(
                 Timber.e(error.toException())
 
                 _allUsers.value = Resource.Error(error.details)
+                _currentUser.value = Resource.Error(error.details)
             }
 
         })
@@ -266,6 +285,42 @@ class MainViewModel @ViewModelInject constructor(
         currentUserRef.child("online").setValue(false)
         currentUserRef.child("lastSeen").setValue(ServerValue.TIMESTAMP)
 
+    }
+
+    fun uploadAndUpdateProfilePicture(currentUserId: String, uri: Uri) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            _pictureUploadStatus.postValue(Resource.Loading())
+
+            val file = fileUtils.getFile(uri)
+
+            val pictureRef = userProfilePicturesRef.child(file?.name.toString())
+
+            pictureRef.putFile(uri).addOnCompleteListener {
+
+                if (it.isSuccessful) {
+
+                    pictureRef.downloadUrl.addOnSuccessListener { profileUri ->
+                        Timber.d(it.toString())
+
+                        userRef.child(currentUserId).child("image").setValue(profileUri.toString())
+                            .addOnCompleteListener { updateTask ->
+                                if (updateTask.isSuccessful) {
+                                    _pictureUploadStatus.postValue(Resource.Success(Unit))
+                                } else
+                                    Timber.d(it.exception)
+                            }
+
+                    }
+
+                } else
+                    Timber.d(it.exception)
+
+            }
+
+
+        }
     }
 
 }
