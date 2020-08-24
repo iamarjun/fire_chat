@@ -10,19 +10,15 @@ import com.arjun.firechat.util.Resource
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import timber.log.Timber
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class MainViewModel @ViewModelInject constructor(
-    private val mDatabase: FirebaseDatabase
+    mDatabase: FirebaseDatabase
 ) : ViewModel() {
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<Unit>>() }
 
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
-
 
     val allUser: LiveData<Resource<List<User>>>
         get() = _allUsers
@@ -202,4 +198,26 @@ class MainViewModel @ViewModelInject constructor(
 
         })
     }
+
+    fun setAsOnline(currentUserId: String) {
+
+        val currentUserRef = userRef.child(currentUserId)
+
+        currentUserRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if (snapshot.exists()) {
+                    currentUserRef.child("online").onDisconnect().setValue(false)
+                    currentUserRef.child("online").setValue(true)
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Timber.d(error.details)
+            }
+
+        })
+    }
+
 }

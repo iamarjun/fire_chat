@@ -61,6 +61,8 @@ class UserListFragment : BaseFragment() {
 
         val currentUserId = mAuth.currentUser?.uid!!
 
+        viewModel.setAsOnline(currentUserId)
+
         viewModel.fetchAllUsers(currentUserId)
 
         viewModel.allUser.observe(viewLifecycleOwner) {
@@ -86,10 +88,6 @@ class UserListFragment : BaseFragment() {
         }
 
 
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
 }
