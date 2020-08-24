@@ -89,16 +89,5 @@ class UserListFragment : BaseFragment() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        viewModel.setAsOnline(currentUserId)
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        viewModel.setAsOffline(currentUserId)
-    }
 
 }
