@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.arjun.firechat.GlideApp
 import com.arjun.firechat.R
 import com.arjun.firechat.model.User
 import kotlinx.android.synthetic.main.user_item.view.*
@@ -13,7 +14,7 @@ import kotlinx.android.synthetic.main.user_item.view.*
 class UsersListAdapter(private val interaction: Interaction? = null) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val DIFF_CALLBACK = object : DiffUtil.ItemCallback<User>() {
+    private val diffCallback = object : DiffUtil.ItemCallback<User>() {
 
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
             return oldItem.id == newItem.id
@@ -24,7 +25,7 @@ class UsersListAdapter(private val interaction: Interaction? = null) :
         }
 
     }
-    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+    private val differ = AsyncListDiffer(this, diffCallback)
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -42,7 +43,7 @@ class UsersListAdapter(private val interaction: Interaction? = null) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is UserViewHolder -> {
-                holder.bind(differ.currentList.get(position))
+                holder.bind(differ.currentList[position])
             }
         }
     }
@@ -62,6 +63,7 @@ class UsersListAdapter(private val interaction: Interaction? = null) :
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val name = itemView.name
+        private val profilePicture = itemView.profile_picture
 
         fun bind(item: User) {
             itemView.setOnClickListener {
@@ -70,8 +72,11 @@ class UsersListAdapter(private val interaction: Interaction? = null) :
 
             name.text = item.name
 
+            GlideApp.with(itemView)
+                .load(item.image)
+                .placeholder(R.drawable.avatar)
+                .into(profilePicture)
         }
-
     }
 
     interface Interaction {
