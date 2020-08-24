@@ -25,19 +25,19 @@ private const val DAY_MILLIS = 24 * HOUR_MILLIS
 
 object TimeSince {
 
-    fun getTimeAgo(time: Long, ctx: Context?): String? {
-        var time = time
-        if (time < 1000000000000L) {
+    fun getTimeAgo(time: Long): String {
+        var t = time
+        if (t < 1000000000000L) {
             // if timestamp given in seconds, convert to millis
-            time *= 1000
+            t *= 1000
         }
         val now: Long = System.currentTimeMillis()
-        if (time > now || time <= 0) {
-            return null
+        if (t > now || t <= 0) {
+            return ""
         }
 
         // TODO: localize
-        val diff = now - time
+        val diff = now - t
         return when {
             diff < MINUTE_MILLIS -> {
                 "just now"

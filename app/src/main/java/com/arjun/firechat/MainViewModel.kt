@@ -7,9 +7,13 @@ import androidx.lifecycle.ViewModel
 import com.arjun.firechat.model.Message
 import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
+import com.arjun.firechat.util.TimeSince
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import timber.log.Timber
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainViewModel @ViewModelInject constructor(
     mDatabase: FirebaseDatabase
@@ -17,8 +21,8 @@ class MainViewModel @ViewModelInject constructor(
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<Unit>>() }
-
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
+    private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
 
     val allUser: LiveData<Resource<List<User>>>
         get() = _allUsers
@@ -28,6 +32,9 @@ class MainViewModel @ViewModelInject constructor(
 
     val allMessage: LiveData<Resource<List<Message>>>
         get() = _allMessages
+
+    val chatUserStatus: LiveData<Resource<String>>
+        get() = _chatUserStatus
 
     private val rootRef = mDatabase.reference
     private val userRef = mDatabase.getReference("users")
@@ -95,7 +102,7 @@ class MainViewModel @ViewModelInject constructor(
                 if (!snapshot.hasChild(chatUserId)) {
                     val chatMap = hashMapOf<String, Any>(
                         "seen" to false,
-                        "timestamp" to System.currentTimeMillis()
+                        "timestamp" to ServerValue.TIMESTAMP
                     )
 
                     val chatUserMap = hashMapOf<String, Any>(
@@ -137,7 +144,7 @@ class MainViewModel @ViewModelInject constructor(
             "seen" to false,
             "type" to "text",
             "from" to currentUserId,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to ServerValue.TIMESTAMP,
         )
 
 
@@ -198,6 +205,34 @@ class MainViewModel @ViewModelInject constructor(
         })
     }
 
+    fun getChatUserPresence(chatUserId: String) {
+
+        _chatUserStatus.value = Resource.Loading()
+
+        userRef.child(chatUserId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if (snapshot.exists()) {
+                    val online = snapshot.child("online").value as Boolean
+                    val lastSeen = snapshot.child("lastSeen").value as Long
+
+                    if (online) {
+                        _chatUserStatus.value = Resource.Success("online")
+                    } else {
+                        _chatUserStatus.value = Resource.Success(TimeSince.getTimeAgo(lastSeen))
+                    }
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Timber.d(error.details)
+                _chatUserStatus.value = Resource.Error(error.details)
+            }
+
+        })
+    }
+
     fun setUserPresence(currentUserId: String) {
 
         val currentUserRef = userRef.child(currentUserId)
@@ -207,6 +242,7 @@ class MainViewModel @ViewModelInject constructor(
 
                 if (snapshot.exists()) {
                     currentUserRef.child("online").onDisconnect().setValue(false)
+                    currentUserRef.child("lastSeen").setValue(ServerValue.TIMESTAMP)
                 }
 
             }
@@ -228,6 +264,8 @@ class MainViewModel @ViewModelInject constructor(
 
         val currentUserRef = userRef.child(currentUserId)
         currentUserRef.child("online").setValue(false)
+        currentUserRef.child("lastSeen").setValue(ServerValue.TIMESTAMP)
+
     }
 
 }

@@ -61,6 +61,8 @@ class ChatFragment : BaseFragment() {
 
         viewModel.chatInit(currentUserId, chatUserId)
 
+        viewModel.getChatUserPresence(chatUserId)
+
         binding.send.setOnClickListener {
 
             val message = binding.message.text.toString()
@@ -85,6 +87,24 @@ class ChatFragment : BaseFragment() {
                         chatAdapter.submitList(messages)
                         chatAdapter.notifyItemInserted(messages.size - 1)
                         binding.chatMessages.scrollToPosition(messages.size - 1)
+                    }
+                }
+
+                is Resource.Error -> {
+                    it.message?.let { errorMessage ->
+                        Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+        viewModel.chatUserStatus.observe(viewLifecycleOwner) {
+
+            when (it) {
+
+                is Resource.Success -> {
+                    it.data?.let { status ->
+                        actionbar?.subtitle = status
                     }
                 }
 

@@ -17,6 +17,7 @@ abstract class BaseFragment : Fragment() {
 
     val currentUserId by lazy { currentUser?.uid }
 
+    val actionbar by lazy { (requireActivity() as AppCompatActivity).supportActionBar }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -25,7 +26,6 @@ abstract class BaseFragment : Fragment() {
     }
 
     fun setActionBarTitle(mTitle: String = getString(R.string.app_name)) {
-        val actionbar = (requireActivity() as AppCompatActivity).supportActionBar
         actionbar?.apply {
             title = mTitle
         }
