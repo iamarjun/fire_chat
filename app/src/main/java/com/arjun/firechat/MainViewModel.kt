@@ -199,7 +199,7 @@ class MainViewModel @ViewModelInject constructor(
         })
     }
 
-    fun setAsOnline(currentUserId: String) {
+    fun setUserPresence(currentUserId: String) {
 
         val currentUserRef = userRef.child(currentUserId)
 
@@ -208,7 +208,6 @@ class MainViewModel @ViewModelInject constructor(
 
                 if (snapshot.exists()) {
                     currentUserRef.child("online").onDisconnect().setValue(false)
-                    currentUserRef.child("online").setValue(true)
                 }
 
             }
@@ -218,6 +217,18 @@ class MainViewModel @ViewModelInject constructor(
             }
 
         })
+    }
+
+    fun setAsOnline(currentUserId: String) {
+
+        val currentUserRef = userRef.child(currentUserId)
+        currentUserRef.child("online").setValue(true)
+    }
+
+    fun setAsOffline(currentUserId: String) {
+
+        val currentUserRef = userRef.child(currentUserId)
+        currentUserRef.child("online").setValue(false)
     }
 
 }

@@ -27,6 +27,8 @@ class UserListFragment : BaseFragment() {
     @Inject
     internal lateinit var mAuth: FirebaseAuth
 
+    private val currentUserId by lazy { mAuth.currentUser?.uid!! }
+
     private val userAdapter: UsersListAdapter by lazy {
         UsersListAdapter(object :
             UsersListAdapter.Interaction {
@@ -59,9 +61,7 @@ class UserListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val currentUserId = mAuth.currentUser?.uid!!
-
-        viewModel.setAsOnline(currentUserId)
+        viewModel.setUserPresence(currentUserId)
 
         viewModel.fetchAllUsers(currentUserId)
 
@@ -87,7 +87,18 @@ class UserListFragment : BaseFragment() {
             adapter = userAdapter
         }
 
+    }
 
+    override fun onStart() {
+        super.onStart()
+
+        viewModel.setAsOnline(currentUserId)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        viewModel.setAsOffline(currentUserId)
     }
 
 }
