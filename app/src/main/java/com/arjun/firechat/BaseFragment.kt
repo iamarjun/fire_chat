@@ -23,11 +23,19 @@ abstract class BaseFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setActionBarTitle()
+        setActionBarSubtitle()
     }
 
     fun setActionBarTitle(mTitle: String = getString(R.string.app_name)) {
         actionbar?.apply {
             title = mTitle
+        }
+    }
+
+    fun setActionBarSubtitle(mSubTitle: String = "") {
+        actionbar?.apply {
+            subtitle = mSubTitle
+
         }
     }
 

@@ -104,7 +104,7 @@ class ChatFragment : BaseFragment() {
 
                 is Resource.Success -> {
                     it.data?.let { status ->
-                        actionbar?.subtitle = status
+                        setActionBarSubtitle(status)
                     }
                 }
 
