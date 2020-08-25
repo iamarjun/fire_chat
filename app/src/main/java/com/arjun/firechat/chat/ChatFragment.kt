@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
@@ -28,7 +29,7 @@ class ChatFragment : BaseFragment() {
     private val binding: FragmentChatBinding by viewBinding(FragmentChatBinding::bind)
     private val viewModel: MainViewModel by activityViewModels()
     private val args: ChatFragmentArgs by navArgs()
-
+    private var endOfRecyclerView = true
     private val chatUser: User by lazy { args.chatUser }
 
     private lateinit var chatAdapter: ChatAdapter
@@ -76,10 +77,19 @@ class ChatFragment : BaseFragment() {
 
         chatAdapter = ChatAdapter(currentUserId)
 
+        chatAdapter.stateRestorationPolicy =
+            RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+
         binding.chatMessages.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = chatAdapter
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    endOfRecyclerView = !recyclerView.canScrollVertically(1)
+                }
+            })
         }
 
         viewModel.chatInit(currentUserId, chatUserId)
@@ -109,7 +119,8 @@ class ChatFragment : BaseFragment() {
                     it.data?.let { messages ->
                         chatAdapter.submitList(messages)
                         chatAdapter.notifyItemInserted(messages.size - 1)
-                        binding.chatMessages.scrollToPosition(messages.size - 1)
+                        if (endOfRecyclerView)
+                            binding.chatMessages.scrollToPosition(messages.size - 1)
                     }
                 }
 
