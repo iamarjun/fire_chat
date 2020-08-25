@@ -54,7 +54,7 @@ class ChatFragment : BaseFragment() {
         Timber.d(it.toString())
 
         it?.let { uri ->
-            viewModel.sendImage(currentUserId!!, chatUser.id, uri)
+            viewModel.sendMediaMessage(currentUserId!!, chatUser.id, uri)
         }
     }
 

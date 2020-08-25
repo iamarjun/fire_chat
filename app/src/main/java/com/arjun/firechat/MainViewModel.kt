@@ -29,6 +29,9 @@ class MainViewModel @ViewModelInject constructor(
     private val chatRef = mDatabase.getReference("chat")
     private val messageRef = mDatabase.getReference("messages")
 
+    private var lastSendMediaUri: String? = null
+    private var lastSendMediaMessage: Message? = null
+
     private val rootStorageRef = mStorage.reference
     private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
     private val mediaRef = rootStorageRef.child("media")
@@ -204,11 +207,23 @@ class MainViewModel @ViewModelInject constructor(
                     _lastMessage.value = it
                 }
 
+                lastSendMediaMessage = messages.find { it.mediaUrl == lastSendMediaUri }
+
                 _allMessages.value = Resource.Success(messages)
 
             }
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+
+                val updatedMessage = snapshot.getValue(Message::class.java)
+                updatedMessage?.id = snapshot.key!!
+
+                messages.forEach {
+                    if (it.id == snapshot.key!!)
+                        it.apply {
+                            mediaUrl = updatedMessage?.mediaUrl!!
+                        }
+                }
 
             }
 
@@ -328,7 +343,7 @@ class MainViewModel @ViewModelInject constructor(
         }
     }
 
-    fun sendImage(currentUserId: String, chatUserId: String, uri: Uri) {
+    private fun uploadMediaMessage(currentUserId: String, chatUserId: String, uri: Uri) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -342,7 +357,10 @@ class MainViewModel @ViewModelInject constructor(
 
                     pictureRef.downloadUrl.addOnSuccessListener { mediaUri ->
                         Timber.d(mediaUri.toString())
-                        sendMediaMessage(currentUserId, chatUserId, mediaUri)
+
+                        lastSendMediaMessage?.id?.let { messageId ->
+                            updateMediaMessage(currentUserId, chatUserId, messageId, mediaUri)
+                        }
                     }
 
                 } else
@@ -355,7 +373,10 @@ class MainViewModel @ViewModelInject constructor(
 
     }
 
-    private fun sendMediaMessage(currentUserId: String, chatUserId: String, uri: Uri) {
+    fun sendMediaMessage(currentUserId: String, chatUserId: String, uri: Uri) {
+
+        lastSendMediaUri = uri.toString()
+
         val currentUserRef = "messages/$currentUserId/$chatUserId"
         val chatUserRef = "messages/$chatUserId/$currentUserId"
 
@@ -383,10 +404,45 @@ class MainViewModel @ViewModelInject constructor(
             messageUserMap
         ) { error, ref ->
 
+            uploadMediaMessage(currentUserId, chatUserId, uri)
+
             error?.let {
                 Timber.d("Chat Log: ${it.details}")
             }
         }
+    }
+
+    private fun updateMediaMessage(
+        currentUserId: String,
+        chatUserId: String,
+        messageId: String,
+        uri: Uri
+    ) {
+        val currentUserMediaMessageRef = "messages/$currentUserId/$chatUserId/$messageId"
+        val chatUserMediaMessageRef = "messages/$chatUserId/$currentUserId/$messageId"
+
+        rootRef.child(currentUserMediaMessageRef).child("mediaUrl").setValue(uri.toString())
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Timber.d("Success updating current user's media message with the firebase media url")
+                    resetLastMediaAssets()
+                } else
+                    Timber.d(it.exception)
+            }
+
+        rootRef.child(chatUserMediaMessageRef).child("mediaUrl").setValue(uri.toString())
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Timber.d("Success updating chat user's media message with the firebase media url")
+                    resetLastMediaAssets()
+                } else
+                    Timber.d(it.exception)
+            }
+    }
+
+    private fun resetLastMediaAssets() {
+        lastSendMediaMessage = null
+        lastSendMediaUri = null
     }
 
 }
