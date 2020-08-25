@@ -50,6 +50,28 @@ class ChatAdapter(private val currentUserId: String) :
                 )
             }
 
+            R.layout.media_message_send -> {
+
+                return MediaMessageSendViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.media_message_send,
+                        parent,
+                        false
+                    )
+                )
+            }
+
+            R.layout.media_message_receive -> {
+
+                return MediaMessageReceiveViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.media_message_receive,
+                        parent,
+                        false
+                    )
+                )
+            }
+
             else -> {
                 throw IllegalStateException()
             }
@@ -65,6 +87,14 @@ class ChatAdapter(private val currentUserId: String) :
             is MessageReceiveViewHolder -> {
                 holder.bind(differ.currentList[position])
             }
+
+            is MediaMessageSendViewHolder -> {
+                holder.bind(differ.currentList[position])
+            }
+
+            is MediaMessageReceiveViewHolder -> {
+                holder.bind(differ.currentList[position])
+            }
         }
     }
 
@@ -72,9 +102,16 @@ class ChatAdapter(private val currentUserId: String) :
         val item = differ.currentList[position]
 
         return if (item.from == currentUserId)
-            R.layout.message_send
+            if (item.type == "text")
+                R.layout.message_send
+            else
+                R.layout.media_message_send
         else
-            R.layout.message_receive
+            if (item.type == "text")
+                R.layout.message_receive
+            else
+                R.layout.media_message_receive
+
     }
 
     override fun getItemCount(): Int {

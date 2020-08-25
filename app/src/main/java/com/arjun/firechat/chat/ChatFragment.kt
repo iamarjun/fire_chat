@@ -1,11 +1,13 @@
 package com.arjun.firechat.chat
 
+import android.Manifest
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -34,6 +36,27 @@ class ChatFragment : BaseFragment() {
 
     private lateinit var chatAdapter: ChatAdapter
 
+    private val getPermission =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
+            permission.values.forEach {
+                if (!it) {
+                    Snackbar.make(
+                        requireView(),
+                        "Please grant necessary permissions",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    return@registerForActivityResult
+                }
+            }
+
+            getContent.launch("image/*")
+        }
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        Timber.d(it.toString())
+        viewModel.sendImage(currentUserId!!, chatUser.id, it)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +71,7 @@ class ChatFragment : BaseFragment() {
 
         setActionBarTitle(chatUser.name)
 
-        val currentUserId = mAuth.currentUser?.uid!!
+        val currentUserId = this.currentUserId!!
         val chatUserId = chatUser.id
 
         chatAdapter = ChatAdapter(currentUserId)
@@ -114,6 +137,15 @@ class ChatFragment : BaseFragment() {
                     }
                 }
             }
+        }
+
+        binding.add.setOnClickListener {
+            getPermission.launch(
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
         }
 
     }

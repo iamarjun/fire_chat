@@ -31,11 +31,13 @@ class MainViewModel @ViewModelInject constructor(
 
     private val rootStorageRef = mStorage.reference
     private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
+    private val mediaRef = rootStorageRef.child("media")
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<User>>() }
     private val _addNewUser by lazy { MutableLiveData<Resource<Unit>>() }
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
+    private val _lastMessage by lazy { MutableLiveData<Message>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
     private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
 
@@ -197,7 +199,10 @@ class MainViewModel @ViewModelInject constructor(
 
                 message?.id = snapshot.key!!
 
-                message?.let { messages.add(it) }
+                message?.let {
+                    messages.add(it)
+                    _lastMessage.value = it
+                }
 
                 _allMessages.value = Resource.Success(messages)
 
@@ -321,6 +326,65 @@ class MainViewModel @ViewModelInject constructor(
 
 
         }
+    }
+
+    fun sendImage(currentUserId: String, chatUserId: String, uri: Uri) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val file = fileUtils.getFile(uri)
+
+            val pictureRef = mediaRef.child(file?.name.toString())
+
+            pictureRef.putFile(uri).addOnCompleteListener {
+
+                if (it.isSuccessful) {
+
+                    pictureRef.downloadUrl.addOnSuccessListener { mediaUri ->
+                        Timber.d(it.toString())
+
+                        val currentUserRef = "messages/$currentUserId/$chatUserId"
+                        val chatUserRef = "messages/$chatUserId/$currentUserId"
+
+                        val push = messageRef.child(currentUserId)
+                            .child(chatUserId)
+                            .push()
+
+                        val pushKey = push.key
+
+                        val messageMap = hashMapOf<String, Any>(
+                            "mediaUrl" to mediaUri.toString(),
+                            "seen" to false,
+                            "type" to "media",
+                            "from" to currentUserId,
+                            "timestamp" to System.currentTimeMillis(),
+                        )
+
+
+                        val messageUserMap = hashMapOf<String, Any>(
+                            "$currentUserRef/$pushKey" to messageMap,
+                            "$chatUserRef/$pushKey" to messageMap
+                        )
+
+                        rootRef.updateChildren(
+                            messageUserMap
+                        ) { error, ref ->
+
+                            error?.let {
+                                Timber.d("Chat Log: ${it.details}")
+                            }
+                        }
+
+                    }
+
+                } else
+                    Timber.d(it.exception)
+
+            }
+
+
+        }
+
     }
 
 }

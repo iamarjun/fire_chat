@@ -11,7 +11,8 @@ data class Message(
     var seen: Boolean = false,
     var type: String = "",
     var timestamp: Long = 0,
-    var from: String = ""
+    var from: String = "",
+    var mediaUrl: String = ""
 ) {
 
     fun getTime(): String {
