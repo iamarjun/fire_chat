@@ -4,13 +4,10 @@ import android.Manifest
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
@@ -54,7 +51,10 @@ class ChatFragment : BaseFragment() {
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
         Timber.d(it.toString())
-        viewModel.sendImage(currentUserId!!, chatUser.id, it)
+
+        it?.let { uri ->
+            viewModel.sendImage(currentUserId!!, chatUser.id, uri)
+        }
     }
 
     override fun onCreateView(

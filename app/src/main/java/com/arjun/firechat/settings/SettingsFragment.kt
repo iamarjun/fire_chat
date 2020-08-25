@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.GlideApp
 import com.arjun.firechat.MainViewModel
@@ -21,7 +20,6 @@ import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -52,13 +50,16 @@ class SettingsFragment : BaseFragment() {
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
         Timber.d(it.toString())
-        setProfilePicture(it)
 
-        currentUserId?.let { uId ->
-            viewModel.uploadAndUpdateProfilePicture(
-                uId,
-                it
-            )
+        it?.let { uri ->
+            setProfilePicture(uri)
+
+            currentUserId?.let { uId ->
+                viewModel.uploadAndUpdateProfilePicture(
+                    uId,
+                    uri
+                )
+            }
         }
     }
 
