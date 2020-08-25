@@ -132,6 +132,10 @@ class ChatFragment : BaseFragment() {
             }
         }
 
+        viewModel.lastUpdatedMessageIndex.observe(viewLifecycleOwner) {
+            chatAdapter.notifyItemChanged(it)
+        }
+
         viewModel.chatUserStatus.observe(viewLifecycleOwner) {
 
             when (it) {

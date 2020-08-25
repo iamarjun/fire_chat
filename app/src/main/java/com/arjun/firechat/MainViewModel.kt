@@ -29,8 +29,9 @@ class MainViewModel @ViewModelInject constructor(
     private val chatRef = mDatabase.getReference("chat")
     private val messageRef = mDatabase.getReference("messages")
 
-    private var lastSendMediaUri: String? = null
-    private var lastSendMediaMessage: Message? = null
+    private var lastSentMediaUri: String? = null
+    private var lastSentMediaMessage: Message? = null
+    private var lastSentMediaMessageIndex: Int = -1
 
     private val rootStorageRef = mStorage.reference
     private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
@@ -40,7 +41,7 @@ class MainViewModel @ViewModelInject constructor(
     private val _currentUser by lazy { MutableLiveData<Resource<User>>() }
     private val _addNewUser by lazy { MutableLiveData<Resource<Unit>>() }
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
-    private val _lastMessage by lazy { MutableLiveData<Message>() }
+    private val _lastUpdatedMessageIndex by lazy { MutableLiveData<Int>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
     private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
 
@@ -55,6 +56,9 @@ class MainViewModel @ViewModelInject constructor(
 
     val allMessage: LiveData<Resource<List<Message>>>
         get() = _allMessages
+
+    val lastUpdatedMessageIndex: LiveData<Int>
+        get() = _lastUpdatedMessageIndex
 
     val chatUserStatus: LiveData<Resource<String>>
         get() = _chatUserStatus
@@ -204,10 +208,9 @@ class MainViewModel @ViewModelInject constructor(
 
                 message?.let {
                     messages.add(it)
-                    _lastMessage.value = it
                 }
 
-                lastSendMediaMessage = messages.find { it.mediaUrl == lastSendMediaUri }
+                lastSentMediaMessage = messages.find { it.mediaUrl == lastSentMediaUri }
 
                 _allMessages.value = Resource.Success(messages)
 
@@ -219,10 +222,12 @@ class MainViewModel @ViewModelInject constructor(
                 updatedMessage?.id = snapshot.key!!
 
                 messages.forEach {
-                    if (it.id == snapshot.key!!)
+                    if (it.id == snapshot.key!!) {
                         it.apply {
                             mediaUrl = updatedMessage?.mediaUrl!!
                         }
+                        _lastUpdatedMessageIndex.value = messages.indexOf(it)
+                    }
                 }
 
             }
@@ -358,7 +363,7 @@ class MainViewModel @ViewModelInject constructor(
                     pictureRef.downloadUrl.addOnSuccessListener { mediaUri ->
                         Timber.d(mediaUri.toString())
 
-                        lastSendMediaMessage?.id?.let { messageId ->
+                        lastSentMediaMessage?.id?.let { messageId ->
                             updateMediaMessage(currentUserId, chatUserId, messageId, mediaUri)
                         }
                     }
@@ -375,7 +380,7 @@ class MainViewModel @ViewModelInject constructor(
 
     fun sendMediaMessage(currentUserId: String, chatUserId: String, uri: Uri) {
 
-        lastSendMediaUri = uri.toString()
+        lastSentMediaUri = uri.toString()
 
         val currentUserRef = "messages/$currentUserId/$chatUserId"
         val chatUserRef = "messages/$chatUserId/$currentUserId"
@@ -441,8 +446,8 @@ class MainViewModel @ViewModelInject constructor(
     }
 
     private fun resetLastMediaAssets() {
-        lastSendMediaMessage = null
-        lastSendMediaUri = null
+        lastSentMediaMessage = null
+        lastSentMediaUri = null
     }
 
 }
