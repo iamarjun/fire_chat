@@ -130,7 +130,7 @@ class MainViewModel @ViewModelInject constructor(
                 if (!snapshot.hasChild(chatUserId)) {
                     val chatMap = hashMapOf<String, Any>(
                         "seen" to false,
-                        "timestamp" to System.currentTimeMillis()
+                        "timestamp" to ServerValue.TIMESTAMP
                     )
 
                     val chatUserMap = hashMapOf<String, Any>(
@@ -172,7 +172,7 @@ class MainViewModel @ViewModelInject constructor(
             "seen" to false,
             "type" to "text",
             "from" to currentUserId,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to ServerValue.TIMESTAMP,
         )
 
 
@@ -286,7 +286,7 @@ class MainViewModel @ViewModelInject constructor(
 
                 if (snapshot.exists()) {
                     currentUserRef.child("online").onDisconnect().setValue(false)
-                    currentUserRef.child("lastSeen").setValue(System.currentTimeMillis())
+                    currentUserRef.child("lastSeen").onDisconnect().setValue(ServerValue.TIMESTAMP)
                 }
 
             }
@@ -308,7 +308,7 @@ class MainViewModel @ViewModelInject constructor(
 
         val currentUserRef = userRef.child(currentUserId)
         currentUserRef.child("online").setValue(false)
-        currentUserRef.child("lastSeen").setValue(System.currentTimeMillis())
+        currentUserRef.child("lastSeen").setValue(ServerValue.TIMESTAMP)
 
     }
 
@@ -396,7 +396,7 @@ class MainViewModel @ViewModelInject constructor(
             "seen" to false,
             "type" to "media",
             "from" to currentUserId,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to ServerValue.TIMESTAMP,
         )
 
 
