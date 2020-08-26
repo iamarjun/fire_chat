@@ -104,6 +104,11 @@ class ChatFragment : BaseFragment() {
 
                 val userStatus = viewModel.isChatUserOnline.value
 
+                userStatus?.let {
+                    if (!it)
+                        viewModel.sendNotification(currentUserId, chatUserId, message)
+                }
+
                 viewModel.sendMessage(currentUserId, chatUserId, message)
 
                 binding.message.text?.clear()

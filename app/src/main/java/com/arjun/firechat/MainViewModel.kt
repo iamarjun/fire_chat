@@ -457,4 +457,17 @@ class MainViewModel @ViewModelInject constructor(
         lastSentMediaUri = null
     }
 
+    fun sendNotification(currentUserId: String, chatUserId: String, message: String) {
+
+        val notificationMap = hashMapOf<String, Any>(
+            "from" to currentUserId,
+            "type" to "message",
+            "message" to message
+        )
+
+        notificationRef.child(chatUserId).push().setValue(notificationMap).addOnSuccessListener {
+            Timber.d("$it")
+        }
+    }
+
 }
