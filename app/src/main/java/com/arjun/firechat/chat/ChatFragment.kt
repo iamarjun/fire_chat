@@ -51,7 +51,7 @@ class ChatFragment : BaseFragment() {
         }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        Timber.d(it.toString())
+        Timber.d("uri: $it")
 
         it?.let { uri ->
             viewModel.sendMediaMessage(currentUserId!!, chatUser.id, uri)
@@ -101,6 +101,8 @@ class ChatFragment : BaseFragment() {
             val message = binding.message.text.toString()
 
             if (!TextUtils.isEmpty(message)) {
+
+                val userStatus = viewModel.isChatUserOnline.value
 
                 viewModel.sendMessage(currentUserId, chatUserId, message)
 

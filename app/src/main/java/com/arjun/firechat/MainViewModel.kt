@@ -25,13 +25,13 @@ class MainViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     private val rootRef = mDatabase.reference
-    private val userRef = mDatabase.getReference("users")
-    private val chatRef = mDatabase.getReference("chat")
-    private val messageRef = mDatabase.getReference("messages")
+    private val userRef = rootRef.child("users")
+    private val chatRef = rootRef.child("chat")
+    private val messageRef = rootRef.child("messages")
+    private val notificationRef = rootRef.child("notification")
 
     private var lastSentMediaUri: String? = null
     private var lastSentMediaMessage: Message? = null
-    private var lastSentMediaMessageIndex: Int = -1
 
     private val rootStorageRef = mStorage.reference
     private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
@@ -43,6 +43,7 @@ class MainViewModel @ViewModelInject constructor(
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
     private val _lastUpdatedMessageIndex by lazy { MutableLiveData<Int>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
+    private val _isChatUserOnline by lazy { MutableLiveData<Boolean>(false) }
     private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
 
     val allUser: LiveData<Resource<List<User>>>
@@ -62,6 +63,9 @@ class MainViewModel @ViewModelInject constructor(
 
     val chatUserStatus: LiveData<Resource<String>>
         get() = _chatUserStatus
+
+    val isChatUserOnline: LiveData<Boolean>
+        get() = _isChatUserOnline
 
     val pictureUploadStatus: LiveData<Resource<Unit>>
         get() = _pictureUploadStatus
@@ -257,15 +261,19 @@ class MainViewModel @ViewModelInject constructor(
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 if (snapshot.exists()) {
-                    val online = snapshot.child("online").value as Boolean
-                    val lastSeen = snapshot.child("lastSeen").value as Long
+                    val online = snapshot.child("online").value as Boolean?
+                    val lastSeen = snapshot.child("lastSeen").value as Long?
 
-                    if (online) {
-                        _chatUserStatus.value = Resource.Success("online")
-                    } else {
-                        _chatUserStatus.value = Resource.Success(TimeSince.getTimeAgo(lastSeen))
+                    _isChatUserOnline.value = online
+
+                    online?.let {
+                        if (it) {
+                            _chatUserStatus.value = Resource.Success("online")
+                        } else {
+                            _chatUserStatus.value =
+                                Resource.Success(TimeSince.getTimeAgo(lastSeen ?: 0))
+                        }
                     }
-
                 }
             }
 
@@ -288,7 +296,6 @@ class MainViewModel @ViewModelInject constructor(
                     currentUserRef.child("online").onDisconnect().setValue(false)
                     currentUserRef.child("lastSeen").onDisconnect().setValue(ServerValue.TIMESTAMP)
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {

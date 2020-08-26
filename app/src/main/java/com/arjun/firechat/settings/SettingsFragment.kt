@@ -49,7 +49,7 @@ class SettingsFragment : BaseFragment() {
         }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        Timber.d(it.toString())
+        Timber.d("uri: $it")
 
         it?.let { uri ->
             setProfilePicture(uri)
