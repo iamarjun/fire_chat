@@ -3,4 +3,6 @@
     <string name="ok">Continue</string>
     <string name="sign_in">Sign In</string>
     <string name="file_provider" translatable="false">com.arjun.firechat.fileprovider</string>
+    <string name="default_notification_channel_id">02111995</string>
+    <string name="chat_message">Chat Message</string>
 </resources>

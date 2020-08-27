@@ -13,6 +13,7 @@ import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.TimeSince
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,23 +75,42 @@ class MainViewModel @ViewModelInject constructor(
 
         _addNewUser.value = Resource.Loading()
 
-        user?.let {
-            val db = userRef.child(it.uid)
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Timber.w("getInstanceId failed:  ${task.exception}")
+                    task.exception?.message?.let { _addNewUser.value = Resource.Error(it) }
+                    return@addOnCompleteListener
+                }
 
-            val userMap = hashMapOf("name" to name)
+                // Get new Instance ID token
+                val token = task.result?.token
+                Timber.d(token)
 
-            db.setValue(userMap).addOnCompleteListener {
-                _addNewUser.value = Resource.Success(Unit)
+                user?.let {
+                    val db = userRef.child(it.uid)
 
-            }.addOnFailureListener { e ->
+                    val userMap = hashMapOf<String, Any?>(
+                        "name" to name,
+                        "token" to token,
+                        "online" to true,
+                        "lastSeen" to ServerValue.TIMESTAMP
+                    )
 
-                e.message?.let { message ->
-                    _addNewUser.value = Resource.Error(message)
+                    db.setValue(userMap).addOnCompleteListener {
+                        _addNewUser.value = Resource.Success(Unit)
+
+                    }.addOnFailureListener { e ->
+
+                        e.message?.let { message ->
+                            _addNewUser.value = Resource.Error(message)
+                        }
+
+                    }
+
                 }
 
             }
-
-        }
     }
 
     fun fetchAllUsers(currentUserId: String) {
@@ -283,6 +303,25 @@ class MainViewModel @ViewModelInject constructor(
             }
 
         })
+    }
+
+    fun setRegistrationToken(currentUserId: String) {
+
+        val currentUserRef = userRef.child(currentUserId)
+
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Timber.w("getInstanceId failed:  ${task.exception}")
+                    task.exception?.message?.let { _addNewUser.value = Resource.Error(it) }
+                    return@addOnCompleteListener
+                }
+
+                // Get new Instance ID token
+                val token = task.result?.token
+                Timber.d(token)
+                currentUserRef.child("token").setValue(token)
+            }
     }
 
     fun setUserPresence(currentUserId: String) {

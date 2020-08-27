@@ -1,8 +1,11 @@
 package com.arjun.firechat
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -35,5 +38,32 @@ class MainActivity : AppCompatActivity() {
         currentUserId?.let { viewModel.setAsOffline(it) }
     }
 
+    companion object {
+
+        private const val NOTIFICATION_CHAT_MSG = "NOTIFICATION_CHAT_MSG"
+
+        fun createNotificationIntentForChatMessage(
+            context: Context,
+            storeId: String?
+        ): PendingIntent {
+            val resultIntent = createLaunchFreshIntent(context)
+            resultIntent.action = NOTIFICATION_CHAT_MSG
+//            resultIntent.putExtra(NOTIFICATION_STORE_ID, storeId)
+            return PendingIntent.getActivity(
+                context,
+                FireNotificationManager.NOTIFICATION_ID_CHAT_MSG,
+                resultIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+
+        private fun createLaunchFreshIntent(context: Context): Intent {
+            //MainActivity has launchMode="singleTop and by creating fresh launch intent? will recreate the activity and onUserLogin wii be called
+            val resultIntent = Intent(context, MainActivity::class.java)
+            resultIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            return resultIntent
+        }
+
+    }
 
 }

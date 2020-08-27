@@ -53,6 +53,7 @@ class UserListFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         currentUserId?.let {
+            viewModel.setRegistrationToken(it)
             viewModel.setUserPresence(it)
             viewModel.fetchAllUsers(it)
         }
