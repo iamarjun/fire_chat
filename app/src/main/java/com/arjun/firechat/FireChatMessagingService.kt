@@ -22,8 +22,13 @@ class FireChatMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(p0)
 
         Timber.d("Notification Payload: $p0")
+        Timber.d("Notification Payload Data: ${p0.data}")
+        Timber.d("Notification Payload Notification: ${p0.notification}")
+        Timber.d("Notification Payload Data Body: ${p0.data["body"]}")
 
-        notificationManager.notifyChatMessageReceived("hahahahahhahaha", "")
+        val data = p0.data["body"]
+
+        notificationManager.notifyChatMessageReceived(data?: "Message")
 
     }
 

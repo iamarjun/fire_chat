@@ -43,12 +43,10 @@ class MainActivity : AppCompatActivity() {
         private const val NOTIFICATION_CHAT_MSG = "NOTIFICATION_CHAT_MSG"
 
         fun createNotificationIntentForChatMessage(
-            context: Context,
-            storeId: String?
+            context: Context
         ): PendingIntent {
             val resultIntent = createLaunchFreshIntent(context)
             resultIntent.action = NOTIFICATION_CHAT_MSG
-//            resultIntent.putExtra(NOTIFICATION_STORE_ID, storeId)
             return PendingIntent.getActivity(
                 context,
                 FireNotificationManager.NOTIFICATION_ID_CHAT_MSG,

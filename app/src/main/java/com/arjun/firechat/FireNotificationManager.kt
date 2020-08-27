@@ -27,11 +27,10 @@ class FireNotificationManager @Inject constructor(private val applicationContext
         createChannels()
     }
 
-    fun notifyChatMessageReceived(notificationMessage: String, storeId: String?) {
+    fun notifyChatMessageReceived(notificationMessage: String) {
         val builder = computeNotification(notificationMessage, NotificationType.MESSAGE)
-        val chatIntent: PendingIntent = MainActivity.createNotificationIntentForChatMessage(
-            applicationContext, storeId
-        )
+        val chatIntent: PendingIntent =
+            MainActivity.createNotificationIntentForChatMessage(applicationContext)
         builder.setContentIntent(chatIntent)
         builder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
         val tag = NotificationType.MESSAGE.name + notificationMessage.hashCode()
