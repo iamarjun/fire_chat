@@ -23,7 +23,7 @@ class FireChatMessagingService : FirebaseMessagingService() {
 
         Timber.d("Notification Payload: $p0")
 
-        notificationManager.notifyChatMessageReceived("", "")
+        notificationManager.notifyChatMessageReceived("hahahahahhahaha", "")
 
     }
 

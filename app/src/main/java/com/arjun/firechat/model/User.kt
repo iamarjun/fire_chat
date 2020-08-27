@@ -9,5 +9,6 @@ data class User(
     var name: String = "",
     var lastSeen: Long = 0L,
     var online: Boolean = false,
-    var image: String = ""
+    var image: String = "",
+    var token: String = ""
 ) : Parcelable

@@ -9,15 +9,15 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import java.util.*
 import javax.inject.Inject
 
 class FireNotificationManager @Inject constructor(private val applicationContext: Context) {
 
-    private val notificationManager =
-        applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val notificationManager by lazy { NotificationManagerCompat.from(applicationContext) }
 
-    private val random = Random(System.currentTimeMillis())
+    private val random by lazy { Random(System.currentTimeMillis()) }
 
     enum class NotificationType {
         MESSAGE
@@ -45,7 +45,7 @@ class FireNotificationManager @Inject constructor(private val applicationContext
     private fun createChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(
-                NotificationType.MESSAGE.name,
+                applicationContext.getString(R.string.default_notification_channel_id),
                 R.string.chat_message,
                 NotificationManager.IMPORTANCE_HIGH
             )

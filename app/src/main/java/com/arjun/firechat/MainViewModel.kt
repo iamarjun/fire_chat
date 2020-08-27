@@ -25,18 +25,18 @@ class MainViewModel @ViewModelInject constructor(
     private val fileUtils: FileUtils
 ) : ViewModel() {
 
-    private val rootRef = mDatabase.reference
-    private val userRef = rootRef.child("users")
-    private val chatRef = rootRef.child("chat")
-    private val messageRef = rootRef.child("messages")
-    private val notificationRef = rootRef.child("notification")
+    private val rootRef by lazy { mDatabase.reference }
+    private val userRef by lazy { rootRef.child("users") }
+    private val chatRef by lazy { rootRef.child("chat") }
+    private val messageRef by lazy { rootRef.child("messages") }
+    private val notificationRef by lazy { rootRef.child("notification") }
+
+    private val rootStorageRef by lazy { mStorage.reference }
+    private val userProfilePicturesRef by lazy { rootStorageRef.child("profilePictures") }
+    private val mediaRef by lazy { rootStorageRef.child("media") }
 
     private var lastSentMediaUri: String? = null
     private var lastSentMediaMessage: Message? = null
-
-    private val rootStorageRef = mStorage.reference
-    private val userProfilePicturesRef = rootStorageRef.child("profilePictures")
-    private val mediaRef = rootStorageRef.child("media")
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<User>>() }
@@ -44,7 +44,7 @@ class MainViewModel @ViewModelInject constructor(
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
     private val _lastUpdatedMessageIndex by lazy { MutableLiveData<Int>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
-    private val _isChatUserOnline by lazy { MutableLiveData<Boolean>(false) }
+    private val _isChatUserOnline by lazy { MutableLiveData(false) }
     private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
 
     val allUser: LiveData<Resource<List<User>>>
@@ -154,7 +154,8 @@ class MainViewModel @ViewModelInject constructor(
                 if (!snapshot.hasChild(chatUserId)) {
                     val chatMap = hashMapOf<String, Any>(
                         "seen" to false,
-                        "timestamp" to ServerValue.TIMESTAMP
+                        "timestamp" to ServerValue.TIMESTAMP,
+                        "online" to true
                     )
 
                     val chatUserMap = hashMapOf<String, Any>(
@@ -283,8 +284,6 @@ class MainViewModel @ViewModelInject constructor(
                 if (snapshot.exists()) {
                     val online = snapshot.child("online").value as Boolean?
                     val lastSeen = snapshot.child("lastSeen").value as Long?
-
-                    _isChatUserOnline.value = online
 
                     online?.let {
                         if (it) {
@@ -507,6 +506,26 @@ class MainViewModel @ViewModelInject constructor(
         notificationRef.child(chatUserId).push().setValue(notificationMap).addOnSuccessListener {
             Timber.d("$it")
         }
+    }
+
+    fun updateMyStatusWithChatUser(currentUserId: String?, chatUserId: String, status: Boolean) {
+        chatRef.child(currentUserId!!).child(chatUserId).child("online").setValue(status)
+    }
+
+    fun monitorChatUserStatusWithMe(currentUserId: String, chatUserId: String) {
+        chatRef.child(chatUserId).child(currentUserId).child("online")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    Timber.d("$snapshot")
+                    _isChatUserOnline.value = snapshot.value as Boolean? ?: false
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.details)
+                }
+
+            })
     }
 
 }

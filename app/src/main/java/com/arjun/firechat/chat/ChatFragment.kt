@@ -96,15 +96,17 @@ class ChatFragment : BaseFragment() {
 
         viewModel.getChatUserPresence(chatUserId)
 
+        viewModel.monitorChatUserStatusWithMe(currentUserId, chatUserId)
+
         binding.send.setOnClickListener {
 
             val message = binding.message.text.toString()
 
             if (!TextUtils.isEmpty(message)) {
 
-                val userStatus = viewModel.isChatUserOnline.value
+                val chatUserStatus = viewModel.isChatUserOnline.value
 
-                userStatus?.let {
+                chatUserStatus?.let {
                     if (!it)
                         viewModel.sendNotification(currentUserId, chatUserId, message)
                 }
@@ -170,6 +172,18 @@ class ChatFragment : BaseFragment() {
             )
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        viewModel.updateMyStatusWithChatUser(currentUserId, chatUser.id, true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        viewModel.updateMyStatusWithChatUser(currentUserId, chatUser.id, false)
     }
 
 }
