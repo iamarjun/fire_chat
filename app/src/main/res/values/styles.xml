@@ -1,5 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Alert Dialogs-->
+
+    <style name="ThemeOverlay.MyApp.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="dialogCornerRadius">6dp</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MyApp.NegativeButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MyApp.PositiveButton</item>
+    </style>
+
+    <style name="Widget.MyApp.NegativeButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.NegativeButton</item>
+    </style>
+
+    <style name="Widget.MyApp.PositiveButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.PositiveButton</item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.NegativeButton" parent="">
+        <item name="colorPrimary">#f00</item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.PositiveButton" parent="">
+        <item name="colorPrimary">#00f</item>
+    </style>
+
     <!-- TextInputLayout styles -->
 
     <style name="App.Theme.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">

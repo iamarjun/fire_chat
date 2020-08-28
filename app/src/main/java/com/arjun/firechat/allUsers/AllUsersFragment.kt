@@ -1,9 +1,7 @@
 package com.arjun.firechat.allUsers
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -58,7 +56,7 @@ class AllUsersFragment : BaseFragment() {
 
         setActionBarTitle("All Users")
 
-        viewModel.allUser.observe(viewLifecycleOwner) {
+        viewModel.allUsers.observe(viewLifecycleOwner) {
 
             binding.loader.isVisible = it is Resource.Loading
 
@@ -81,6 +79,5 @@ class AllUsersFragment : BaseFragment() {
         }
 
     }
-
 
 }

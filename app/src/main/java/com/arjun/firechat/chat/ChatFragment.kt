@@ -3,10 +3,9 @@ package com.arjun.firechat.chat
 import android.Manifest
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
+import com.arjun.firechat.blockUnblock.BlockUnblockFragment
 import com.arjun.firechat.databinding.FragmentChatBinding
 import com.arjun.firechat.model.User
 import com.arjun.firechat.util.Resource
@@ -56,6 +56,11 @@ class ChatFragment : BaseFragment() {
         it?.let { uri ->
             viewModel.sendMediaMessage(currentUserId!!, chatUser.id, uri)
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -184,6 +189,26 @@ class ChatFragment : BaseFragment() {
         super.onStop()
 
         viewModel.updateMyStatusWithChatUser(currentUserId, chatUser.id, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.block_unblock, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if (item.itemId == R.id.block) {
+            showDialog()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showDialog() {
+        val newFragment: DialogFragment =
+            BlockUnblockFragment.newInstance(currentUserId!!, chatUser)
+        newFragment.show(childFragmentManager, "dialog")
     }
 
 }

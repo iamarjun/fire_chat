@@ -26,6 +26,11 @@ class MainViewModel @ViewModelInject constructor(
     private val fileUtils: FileUtils
 ) : ViewModel() {
 
+    val currentUserId: String
+        get() = _currentUserId
+
+    private val _currentUserId: String by lazy { "" }
+
     private val rootRef by lazy { mDatabase.reference }
     private val userRef by lazy { rootRef.child("users") }
     private val chatRef by lazy { rootRef.child("chat") }
@@ -40,6 +45,7 @@ class MainViewModel @ViewModelInject constructor(
     private var lastSentMediaMessage: Message? = null
 
     private val _allUsers by lazy { MutableLiveData<Resource<List<User>>>() }
+    private val _chatUsers by lazy { MutableLiveData<Resource<List<User>>>() }
     private val _currentUser by lazy { MutableLiveData<Resource<User>>() }
     private val _addNewUser by lazy { MutableLiveData<Resource<Unit>>() }
     private val _allMessages by lazy { MutableLiveData<Resource<List<Message>>>() }
@@ -48,8 +54,11 @@ class MainViewModel @ViewModelInject constructor(
     private val _isChatUserOnline by lazy { MutableLiveData(false) }
     private val _pictureUploadStatus by lazy { MutableLiveData<Event<Unit>>() }
 
-    val allUser: LiveData<Resource<List<User>>>
+    val allUsers: LiveData<Resource<List<User>>>
         get() = _allUsers
+
+    val chatUsers: LiveData<Resource<List<User>>>
+        get() = _chatUsers
 
     val currentUser: LiveData<Resource<User>>
         get() = _currentUser
@@ -117,6 +126,7 @@ class MainViewModel @ViewModelInject constructor(
     fun fetchAllUsers(currentUserId: String) {
 
         _allUsers.value = Resource.Loading()
+        _chatUsers.value = Resource.Loading()
         _currentUser.value = Resource.Loading()
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -132,8 +142,10 @@ class MainViewModel @ViewModelInject constructor(
                         user?.let { users.add(it) }
                     }
 
-                _currentUser.value = Resource.Success(users.first { it.id == currentUserId })
+                val currentUser = users.first { it.id == currentUserId }
+                _currentUser.value = Resource.Success(currentUser)
                 _allUsers.value = Resource.Success(users.filter { it.id != currentUserId })
+//                _chatUsers.value = Resource.Success(users.filter { it.id != currentUserId && currentUser.blocked.containsAll(it.id) })
 
             }
 
@@ -525,6 +537,19 @@ class MainViewModel @ViewModelInject constructor(
                 }
 
             })
+    }
+
+    fun blockUser(currentUserId: String, chatUserId: String) {
+        val blockUserRef = userRef.child(currentUserId).child("blocked").child(chatUserId)
+
+        val blockUserMap = hashMapOf<String, Any>(
+            "id" to chatUserId
+        )
+
+        blockUserRef.setValue(blockUserMap).addOnCompleteListener {
+            Timber.d("$it")
+        }
+
     }
 
 }

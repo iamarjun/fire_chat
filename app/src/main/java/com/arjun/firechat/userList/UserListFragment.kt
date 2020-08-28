@@ -38,7 +38,6 @@ class UserListFragment : BaseFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("UserListFragment")
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -61,7 +60,7 @@ class UserListFragment : BaseFragment() {
         }
 
 
-        viewModel.allUser.observe(viewLifecycleOwner) {
+        viewModel.allUsers.observe(viewLifecycleOwner) {
 
             binding.loader.isVisible = it is Resource.Loading
 
