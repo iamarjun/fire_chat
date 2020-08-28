@@ -5,6 +5,7 @@ import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
@@ -31,7 +32,7 @@ class AllUsersFragment : BaseFragment() {
             override fun onItemSelected(position: Int, item: User) {
                 val action =
                     UserListFragmentDirections.actionUserListFragmentToChatFragment(item)
-                requireView().findNavController().navigate(action)
+                findNavController().navigate(action)
             }
 
         })

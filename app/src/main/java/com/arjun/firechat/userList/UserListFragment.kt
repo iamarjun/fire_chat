@@ -5,6 +5,7 @@ import android.view.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
@@ -26,7 +27,7 @@ class UserListFragment : BaseFragment() {
             override fun onItemSelected(position: Int, item: User) {
                 val action =
                     UserListFragmentDirections.actionUserListFragmentToChatFragment(item)
-                requireView().findNavController().navigate(action)
+                findNavController().navigate(action)
             }
 
         })
@@ -50,6 +51,8 @@ class UserListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         setActionBarTitle("My Chats")
 
@@ -84,7 +87,7 @@ class UserListFragment : BaseFragment() {
 
         binding.fab.setOnClickListener {
             val action = UserListFragmentDirections.actionUserListFragmentToAllUsersFragment();
-            requireView().findNavController().navigate(action)
+            findNavController().navigate(action)
         }
 
     }
@@ -97,7 +100,7 @@ class UserListFragment : BaseFragment() {
 
         if (item.itemId == R.id.settings) {
             val action = UserListFragmentDirections.actionUserListFragmentToSettingsFragment()
-            requireView().findNavController().navigate(action)
+            findNavController().navigate(action)
             return true
         }
 

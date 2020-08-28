@@ -4,11 +4,12 @@ import android.Manifest
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.*
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -84,9 +85,19 @@ class ChatFragment : BaseFragment() {
         val currentUserId = this.currentUserId!!
         val chatUserId = chatUser.id
 
+        viewModel.getChatUserBlockedUsers(chatUserId)
+
         viewModel.myBlockedUserIds.value?.let {
             isBlocked = it.contains(chatUserId)
             binding.messagingPanel.isVisible = !isBlocked
+        }
+
+        viewModel.chatUserBlockedUserIds.value?.let {
+            if (it.contains(currentUserId)) {
+                findNavController().popBackStack(R.id.userListFragment, true)
+                Toast.makeText(requireActivity(), "You're blocked by this user.", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
 
         chatAdapter = ChatAdapter(currentUserId)
@@ -105,8 +116,6 @@ class ChatFragment : BaseFragment() {
                 }
             })
         }
-
-        viewModel.getChatUserBlockedUsers(chatUserId)
 
         viewModel.chatInit(currentUserId, chatUserId)
 
@@ -189,7 +198,7 @@ class ChatFragment : BaseFragment() {
         }
 
         viewModel.popBack.observe(viewLifecycleOwner, EventObserver {
-            requireView().findNavController().popBackStack(R.id.userListFragment, true)
+            findNavController().popBackStack(R.id.userListFragment, true)
         })
 
     }

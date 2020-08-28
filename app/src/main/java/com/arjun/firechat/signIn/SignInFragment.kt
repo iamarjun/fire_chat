@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.afollestad.materialdialogs.DialogBehavior
 import com.afollestad.materialdialogs.LayoutMode
 import com.afollestad.materialdialogs.MaterialDialog
@@ -110,7 +111,7 @@ class SignInFragment : BaseFragment() {
     private fun navigateToUserListFragment() {
         val action =
             SignInFragmentDirections.actionSignInFragmentToUserListFragment()
-        requireView().findNavController().navigate(action)
+        findNavController().navigate(action)
     }
 
     private fun showSignInDialog(dialogBehavior: DialogBehavior = ModalDialog) {
