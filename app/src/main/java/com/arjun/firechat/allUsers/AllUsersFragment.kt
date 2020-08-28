@@ -1,7 +1,9 @@
-package com.arjun.firechat.userList
+package com.arjun.firechat.allUsers
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -9,8 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arjun.firechat.BaseFragment
 import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
-import com.arjun.firechat.databinding.FragmentUserListBinding
+import com.arjun.firechat.databinding.FragmentAllUsersBinding
 import com.arjun.firechat.model.User
+import com.arjun.firechat.userList.UserListFragmentDirections
+import com.arjun.firechat.userList.UsersListAdapter
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
@@ -18,7 +22,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
 @AndroidEntryPoint
-class UserListFragment : BaseFragment() {
+class AllUsersFragment : BaseFragment() {
+
+    private val binding: FragmentAllUsersBinding by viewBinding(FragmentAllUsersBinding::bind)
+    private val viewModel: MainViewModel by activityViewModels()
 
     private val userAdapter: UsersListAdapter by lazy {
         UsersListAdapter(object :
@@ -32,12 +39,9 @@ class UserListFragment : BaseFragment() {
         })
     }
 
-    private val binding: FragmentUserListBinding by viewBinding(FragmentUserListBinding::bind)
-    private val viewModel: MainViewModel by activityViewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.d("UserListFragment")
+        Timber.d("AllUsersFragment")
         setHasOptionsMenu(true)
     }
 
@@ -46,20 +50,13 @@ class UserListFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_user_list, container, false)
+        return inflater.inflate(R.layout.fragment_all_users, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setActionBarTitle("My Chats")
-
-        currentUserId?.let {
-            viewModel.setRegistrationToken(it)
-            viewModel.setUserPresence(it)
-            viewModel.fetchAllUsers(it)
-        }
-
+        setActionBarTitle("All Users")
 
         viewModel.allUser.observe(viewLifecycleOwner) {
 
@@ -83,26 +80,6 @@ class UserListFragment : BaseFragment() {
             adapter = userAdapter
         }
 
-        binding.fab.setOnClickListener {
-            val action = UserListFragmentDirections.actionUserListFragmentToAllUsersFragment();
-            requireView().findNavController().navigate(action)
-        }
-
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.settings, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        if (item.itemId == R.id.settings) {
-            val action = UserListFragmentDirections.actionUserListFragmentToSettingsFragment()
-            requireView().findNavController().navigate(action)
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
     }
 
 
