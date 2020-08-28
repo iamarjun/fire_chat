@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +18,7 @@ import com.arjun.firechat.R
 import com.arjun.firechat.blockUnblock.BlockUnblockFragment
 import com.arjun.firechat.databinding.FragmentChatBinding
 import com.arjun.firechat.model.User
+import com.arjun.firechat.util.EventObserver
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
 import com.google.android.material.snackbar.Snackbar
@@ -32,6 +35,7 @@ class ChatFragment : BaseFragment() {
     private var endOfRecyclerView = true
     private val chatUser: User by lazy { args.chatUser }
 
+    private var isBlocked = false
     private lateinit var chatAdapter: ChatAdapter
 
     private val getPermission =
@@ -80,6 +84,11 @@ class ChatFragment : BaseFragment() {
         val currentUserId = this.currentUserId!!
         val chatUserId = chatUser.id
 
+        viewModel.myBlockedUserIds.value?.let {
+            isBlocked = it.contains(chatUserId)
+            binding.messagingPanel.isVisible = !isBlocked
+        }
+
         chatAdapter = ChatAdapter(currentUserId)
 
         chatAdapter.stateRestorationPolicy =
@@ -96,6 +105,8 @@ class ChatFragment : BaseFragment() {
                 }
             })
         }
+
+        viewModel.getChatUserBlockedUsers(chatUserId)
 
         viewModel.chatInit(currentUserId, chatUserId)
 
@@ -177,6 +188,10 @@ class ChatFragment : BaseFragment() {
             )
         }
 
+        viewModel.popBack.observe(viewLifecycleOwner, EventObserver {
+            requireView().findNavController().popBackStack(R.id.userListFragment, true)
+        })
+
     }
 
     override fun onStart() {
@@ -192,22 +207,20 @@ class ChatFragment : BaseFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.block_unblock, menu)
+        if (isBlocked)
+            inflater.inflate(R.menu.unblock, menu)
+        else
+            inflater.inflate(R.menu.block, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        if (item.itemId == R.id.block) {
-            showDialog()
-            return true
-        }
-
+        showDialog()
         return super.onOptionsItemSelected(item)
     }
 
     private fun showDialog() {
         val newFragment: DialogFragment =
-            BlockUnblockFragment.newInstance(currentUserId!!, chatUser)
+            BlockUnblockFragment.newInstance(currentUserId!!, chatUser, isBlocked)
         newFragment.show(childFragmentManager, "dialog")
     }
 

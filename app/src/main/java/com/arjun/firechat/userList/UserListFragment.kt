@@ -57,8 +57,8 @@ class UserListFragment : BaseFragment() {
             viewModel.setRegistrationToken(it)
             viewModel.setUserPresence(it)
             viewModel.fetchAllUsers(it)
+            viewModel.getMyBlockedUsers(it)
         }
-
 
         viewModel.allUsers.observe(viewLifecycleOwner) {
 
