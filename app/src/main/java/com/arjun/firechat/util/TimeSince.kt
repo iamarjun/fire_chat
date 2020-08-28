@@ -32,9 +32,9 @@ object TimeSince {
             t *= 1000
         }
         val now: Long = System.currentTimeMillis()
-        if (t > now || t <= 0) {
-            return ""
-        }
+//        if (t > now || t <= 0) {
+//            return ""
+//        }
 
         // TODO: localize
         val diff = now - t

@@ -67,7 +67,6 @@ class FireNotificationManager @Inject constructor(private val applicationContext
         // Sets the notification light color for notifications posted to this
         // channel, if the device supports this feature.
         mChannel.enableVibration(true)
-        mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         notificationManager.createNotificationChannel(mChannel)
     }
 
