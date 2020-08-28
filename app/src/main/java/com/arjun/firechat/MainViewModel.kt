@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arjun.firechat.model.Message
 import com.arjun.firechat.model.User
+import com.arjun.firechat.util.Event
 import com.arjun.firechat.util.FileUtils
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.TimeSince
@@ -45,7 +46,7 @@ class MainViewModel @ViewModelInject constructor(
     private val _lastUpdatedMessageIndex by lazy { MutableLiveData<Int>() }
     private val _chatUserStatus by lazy { MutableLiveData<Resource<String>>() }
     private val _isChatUserOnline by lazy { MutableLiveData(false) }
-    private val _pictureUploadStatus by lazy { MutableLiveData<Resource<Unit>>() }
+    private val _pictureUploadStatus by lazy { MutableLiveData<Event<Unit>>() }
 
     val allUser: LiveData<Resource<List<User>>>
         get() = _allUsers
@@ -68,7 +69,7 @@ class MainViewModel @ViewModelInject constructor(
     val isChatUserOnline: LiveData<Boolean>
         get() = _isChatUserOnline
 
-    val pictureUploadStatus: LiveData<Resource<Unit>>
+    val pictureUploadStatus: LiveData<Event<Unit>>
         get() = _pictureUploadStatus
 
     fun addNewUser(name: String, user: FirebaseUser?) {
@@ -361,8 +362,6 @@ class MainViewModel @ViewModelInject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            _pictureUploadStatus.postValue(Resource.Loading())
-
             val file = fileUtils.getFile(uri)
 
             val pictureRef = userProfilePicturesRef.child(file?.name.toString())
@@ -377,7 +376,7 @@ class MainViewModel @ViewModelInject constructor(
                         userRef.child(currentUserId).child("image").setValue(profileUri.toString())
                             .addOnCompleteListener { updateTask ->
                                 if (updateTask.isSuccessful) {
-                                    _pictureUploadStatus.postValue(Resource.Success(Unit))
+                                    _pictureUploadStatus.postValue(Event(Unit))
                                 } else
                                     Timber.d(it.exception)
                             }

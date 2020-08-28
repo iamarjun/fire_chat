@@ -15,6 +15,7 @@ import com.arjun.firechat.MainViewModel
 import com.arjun.firechat.R
 import com.arjun.firechat.databinding.FragmentSettingsBinding
 import com.arjun.firechat.model.User
+import com.arjun.firechat.util.EventObserver
 import com.arjun.firechat.util.FileUtils
 import com.arjun.firechat.util.Resource
 import com.arjun.firechat.util.viewBinding
@@ -102,21 +103,10 @@ class SettingsFragment : BaseFragment() {
             )
         }
 
-        viewModel.pictureUploadStatus.observe(viewLifecycleOwner) {
-
-            when (it) {
-
-                is Resource.Success -> {
-                    Snackbar.make(requireView(), "Profile Picture Updated", Snackbar.LENGTH_SHORT)
-                        .show()
-                }
-                is Resource.Error -> {
-                    it.message?.let { errorMessage ->
-                        Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
+        viewModel.pictureUploadStatus.observe(viewLifecycleOwner, EventObserver {
+            Snackbar.make(requireView(), "Profile Picture Updated", Snackbar.LENGTH_SHORT)
+                .show()
+        })
 
     }
 
